@@ -1,28 +1,30 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
+      {{ elasticQuery }}
       <el-row :gutter="15">
         <el-col :md="8" :sm="12" :xs="24">
-          <el-input v-model="elasticQuery.id" placeholder="ID giao dịch" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-input v-model="transactionFilter.id" placeholder="ID giao dịch" clearable class="filter-item" />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
-          <el-input v-model="elasticQuery.sendUser" placeholder="Tên người gửi" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-input v-model="transactionFilter.sendUser" placeholder="Tên người gửi" clearable class="filter-item" />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
-          <el-input v-model="elasticQuery.receiveUser" placeholder="Tên người nhận" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-input v-model="transactionFilter.receiveUser" placeholder="Tên người nhận" clearable class="filter-item" />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
-          <el-input v-model="elasticQuery.itemCode" placeholder="Mã vật phẩm" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-input v-model="transactionFilter.itemCode" placeholder="Mã vật phẩm" clearable class="filter-item" />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
-          <el-input v-model="elasticQuery.itemName" placeholder="Tên vật phẩm" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-input v-model="transactionFilter.itemName" placeholder="Tên vật phẩm" clearable class="filter-item" />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
           <el-date-picker
-            v-model="elasticQuery.timestamp"
+            v-model="transactionFilter.timestamp"
             class="filter-item full-width"
             type="daterange"
             range-separator="To"
+            value-format="timestamp"
             start-placeholder="Start date"
             end-placeholder="End date"
           />
@@ -99,20 +101,28 @@ export default {
       elasticQuery: {
         query: {
           bool: {
-            should: [],
-            must: [],
-            filter: [],
-            must_not: []
+            should: [
+              {
+                match: {
+                  sendUser: this.$store.state.user.name
+                }
+              },
+              {
+                match: {
+                  receiveUser: this.$store.state.user.name
+                }
+              }
+            ]
           }
         }
       },
       transactionFilter: {
-        id: null,
-        sendUser: null,
-        receiveUser: null,
-        itemCode: null,
-        itemName: null,
-        timestamp: null
+        id: '',
+        sendUser: '',
+        receiveUser: '',
+        itemCode: '',
+        itemName: '',
+        timestamp: ''
       }
     }
   },
@@ -120,27 +130,58 @@ export default {
     this.getTransactionHistory()
   },
   methods: {
-    getTransactionHistory() {
-      this.listLoading = true
-      this.elasticQuery.query.bool.should.push(
-        {
-          match: {
-            sendUser: this.$store.state.user.name
-          }
-        },
-        {
-          match: {
-            receiveUser: this.$store.state.user.name
+    resetElasticQuery() {
+      this.elasticQuery = {
+        query: {
+          bool: {
+            should: [
+              {
+                match: {
+                  sendUser: this.$store.state.user.name
+                }
+              },
+              {
+                match: {
+                  receiveUser: this.$store.state.user.name
+                }
+              }
+            ],
+            must: [],
+            filter: [],
+            must_not: []
           }
         }
-      )
+      }
+    },
+    getTransactionHistory() {
+      this.listLoading = true
       elasticQuery(this.elasticQuery).then(response => {
         this.transactionList = response
         this.listLoading = false
       })
     },
     handleFilter() {
-
+      this.elasticQuery.query.bool.must = []
+      Object.keys(this.transactionFilter).forEach(key => {
+        if (key === 'timestamp' && Array.isArray(this.transactionFilter[key])) {
+          this.elasticQuery.query.bool.must.push({
+            range: {
+              timestamp: { gte: this.transactionFilter.timestamp[0], lte: this.transactionFilter.timestamp[1] }
+            }
+          })
+        } else if (this.transactionFilter[key] != null && this.transactionFilter[key] !== '') {
+          this.elasticQuery.query.bool.must.push({
+            match: {
+              [key]: this.transactionFilter[key]
+            }
+          })
+        }
+      })
+      this.listLoading = true
+      elasticQuery(this.elasticQuery).then(response => {
+        this.transactionList = response
+        this.listLoading = false
+      })
     }
   }
 }
