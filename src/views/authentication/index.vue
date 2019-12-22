@@ -187,13 +187,22 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           register(this.registerForm).then(response => {
-            this.showDialog = false
-            this.$notify({
-              title: 'Thành công',
-              message: 'Tạo tài khoản thành công',
-              type: 'success',
-              duration: 2000
-            })
+            if (response.statusCode === 0) {
+              this.showDialog = false
+              this.$notify({
+                title: 'Thành công',
+                message: 'Tạo tài khoản thành công',
+                type: 'success',
+                duration: 2000
+              })
+            } else {
+              this.$notify({
+                title: 'Thất bại',
+                message: response.details,
+                type: 'error',
+                duration: 2000
+              })
+            }
           })
         }
       })

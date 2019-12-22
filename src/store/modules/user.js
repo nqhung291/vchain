@@ -25,13 +25,17 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
-        const data = response
-        commit('SET_TOKEN', data.authorization)
-        commit('SET_ROLES', data.role)
-        commit('SET_NAME', userInfo.username)
-        setToken(data.authorization)
-        setName(userInfo.username)
-        resolve()
+        if (response.statusCode === 0) {
+          const data = response
+          commit('SET_TOKEN', data.authorization)
+          commit('SET_ROLES', data.role)
+          commit('SET_NAME', userInfo.username)
+          setToken(data.authorization)
+          setName(userInfo.username)
+          resolve()
+        } else {
+          reject()
+        }
       }).catch(error => {
         reject(error)
       })
