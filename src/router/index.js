@@ -59,7 +59,7 @@ export const constantRoutes = [
         path: 'repository',
         component: () => import('@/views/repository'),
         name: 'Kho đồ',
-        meta: { title: 'Kho đồ', icon: 'dashboard', noCache: true }
+        meta: { title: 'Kho đồ', icon: 'shopping', noCache: true }
       }
     ]
   },
@@ -68,10 +68,22 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'history',
+        path: '',
         component: () => import('@/views/history'),
         name: 'Lịch sử giao dịch',
-        meta: { title: 'Lịch sử giao dịch', icon: 'dashboard', noCache: true }
+        meta: { title: 'Lịch sử giao dịch', icon: 'list', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/send-item',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/sendItem'),
+        name: 'Chuyển đồ',
+        meta: { title: 'Chuyển đồ', icon: 'guide', noCache: true }
       }
     ]
   }

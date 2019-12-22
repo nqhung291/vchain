@@ -1,10 +1,9 @@
 import { login } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken, setName, removeName, getName } from '@/utils/auth'
 
 const state = {
   token: getToken(),
-  name: '',
-  avatar: '',
+  name: getName(),
   roles: []
 }
 
@@ -14,6 +13,9 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_NAME: (state, name) => {
+    state.name = name
   }
 }
 
@@ -26,7 +28,9 @@ const actions = {
         const data = response
         commit('SET_TOKEN', data.authorization)
         commit('SET_ROLES', data.role)
+        commit('SET_NAME', userInfo.username)
         setToken(data.authorization)
+        setName(userInfo.username)
         resolve()
       }).catch(error => {
         reject(error)
@@ -38,7 +42,9 @@ const actions = {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
       commit('SET_ROLES', [])
+      commit('SET_NAME', '')
       removeToken()
+      removeName()
       resolve()
     })
   }

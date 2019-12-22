@@ -3,22 +3,22 @@
     <div class="filter-container">
       <el-row :gutter="15">
         <el-col :md="8" :sm="12" :xs="24">
-          <el-input v-model="listQuery.staff_code" placeholder="ID giao dịch" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-input v-model="elasticQuery.staff_code" placeholder="ID giao dịch" class="filter-item" @keyup.enter.native="handleFilter" />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
-          <el-input v-model="listQuery.full_name" placeholder="Tên người gửi" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-input v-model="elasticQuery.full_name" placeholder="Tên người gửi" class="filter-item" @keyup.enter.native="handleFilter" />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
-          <el-input v-model="listQuery.full_name" placeholder="Tên người nhận" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-input v-model="elasticQuery.full_name" placeholder="Tên người nhận" class="filter-item" @keyup.enter.native="handleFilter" />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
-          <el-select v-model="listQuery.status" placeholder="--- Loại giao dịch ---" clearable class="filter-item full-width">
+          <el-select v-model="elasticQuery.status" placeholder="--- Loại giao dịch ---" clearable class="filter-item full-width">
             <el-option v-for="item in statusOptions" :key="item.status" :label="item.description" :value="item.status" />
           </el-select>
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
           <el-date-picker
-            v-model="listQuery.to_date"
+            v-model="elasticQuery.to_date"
             type="date"
             format="dd/MM/yyyy"
             value-format="dd/MM/yyyy"
@@ -37,63 +37,69 @@
     <el-table
       :key="tableKey"
       v-loading="listLoading"
-      :data="list"
+      :data="transactionList"
       border
       fit
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column label="STT" prop="id" align="center" min-width="50">
+      <!-- <el-table-column label="STT" prop="id" align="center" min-width="50">
+        <template slot-scope="{row}">
+          <span>{{ row.$index }}</span>
+        </template>
+      </el-table-column> -->
+      <el-table-column label="ID giao dịch" prop="staff_code" align="center" min-width="150">
         <template slot-scope="{row}">
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="ID giao dịch" prop="staff_code" align="center" min-width="150">
+      <el-table-column label="Người gửi" align="center" min-width="100">
         <template slot-scope="{row}">
-          <span>{{ row.staff_code }}</span>
+          <span>{{ row.sendUser }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Người gửi" min-width="150" align="center">
+      <el-table-column label="Người nhận" align="center" min-width="100">
         <template slot-scope="{row}">
-          <span>{{ row.full_name }}</span>
+          <span>{{ row.receiveUser }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Người nhận" align="center" min-width="150">
+      <el-table-column label="Mã giao dịch blockchain" min-width="400" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.email }}</span>
+          <span>{{ row.transactionIdBlockchain }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Vật phẩm" width="150" align="center">
+      <el-table-column label="Mã vật phẩm" align="center" min-width="100">
         <template slot-scope="{row}">
-          <span>{{ row.mobile }}</span>
+          <span>{{ row.itemCode }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Loại hình giao dịch" align="center" min-width="200">
+      <el-table-column label="Tên vật phẩm" align="center" min-width="100">
         <template slot-scope="{row}">
-          <span>{{ row.team }}</span>
+          <span>{{ row.itemName }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Thời gian" align="center" min-width="150">
         <template slot-scope="{row}">
-          <span>{{ row.created_date }}</span>
+          <span>{{ new Date(row.timestamp * 1000).toLocaleString() }}</span>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination
+    <!-- <pagination
       v-show="total>0"
       :total="total"
       :page-sizes="[10, 25, 50, 100]"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.page_size"
-      @pagination="getList"
-    />
+      :page.sync="elasticQuery.page"
+      :limit.sync="elasticQuery.page_size"
+      @pagination="getTransactionHistory"
+    /> -->
   </div>
 </template>
 
 <script>
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import waves from '@/directive/waves' // waves directive
+import { elasticQuery } from '@/api/exchange'
 
 export default {
   name: 'StaffTable',
@@ -102,18 +108,18 @@ export default {
   data() {
     return {
       tableKey: 0,
-      list: null,
+      transactionList: null,
       total: 0,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        page_size: 10,
-        staffCode: undefined,
-        fullName: undefined,
-        status: undefined,
-        ordering: 'id',
-        from_date: undefined,
-        to_date: undefined
+      elasticQuery: {
+        query: {
+          bool: {
+            should: [],
+            must: [],
+            filter: [],
+            must_not: []
+          }
+        }
       },
       statusOptions: [
         {
@@ -134,15 +140,19 @@ export default {
     }
   },
   created() {
-    this.getList()
+    this.getTransactionHistory()
   },
   methods: {
-    getList() {
-      this.listLoading = false
+    getTransactionHistory() {
+      this.listLoading = true
+      elasticQuery(this.elasticQuery).then(response => {
+        this.transactionList = response
+        this.listLoading = false
+      })
     },
     handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
+      this.elasticQuery.page = 1
+      this.getTransactionHistory()
     },
     handleDetail(staffId) {
       this.$router.push({ path: `/management-staff/staff-detail/${staffId}/` })

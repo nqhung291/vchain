@@ -2,10 +2,21 @@ import request from '@/utils/request'
 
 export function sendItem(data) {
   return request({
-    url: '/itemexchange/create',
+    url: '/itemexchange2/create',
     method: 'post',
     headers: {
-      'Content-Type': 'text/plain'
+      'Content-Type': 'application/json'
+    },
+    data
+  })
+}
+
+export function elasticQuery(data) {
+  return request({
+    url: '/itemexchange2/elasticsearch',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json'
     },
     data
   })
