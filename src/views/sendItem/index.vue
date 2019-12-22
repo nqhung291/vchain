@@ -1,6 +1,10 @@
 <template>
   <div class="app-container">
-    <strong>Thông tin gửi đồ</strong>
+    <el-row>
+      <el-col :span="24" style="text-align: center">
+        <h3>Thông tin gửi đồ</h3>
+      </el-col>
+    </el-row>
     <el-form ref="importFile" :rules="rule" :model="sendData" label-width="150px" label-position="left">
       <div style="margin-top: 20px;">
         <el-row :gutter="20">
@@ -20,17 +24,6 @@
               <el-form-item label="Mã item:">
                 <span>{{ sendData.itemCode }}</span>
               </el-form-item>
-              <!-- <el-form-item label="Ảnh:">
-                <el-button type="primary" @click="$refs.itemImage.click()"><i class="el-icon-upload" /> Chọn Ảnh </el-button>
-                <img v-if="imageSrc" :src="imageSrc" style="margin-top: 10px">
-                <input
-                  ref="itemImage"
-                  type="file"
-                  style="display:none"
-                  accept="image/*"
-                  @change="handleChangeImage"
-                >
-              </el-form-item> -->
             </el-card>
             <div class="right-align" style="margin-top:20px">
               <el-button type="info" size="large" @click="handleCancelSend">
@@ -82,14 +75,6 @@ export default {
     ])
   },
   methods: {
-  //   handleChangeSubImage(event) {
-  //     this.subImage = event.target.files[0]
-  //     this.subImageSrc = URL.createObjectURL(this.subImage)
-  //   },    handleChangeImage(event) {
-    // handleChangeImage(event) {
-    //   this.sendData.itemImage = event.target.files[0]
-    //   this.imageSrc = URL.createObjectURL(this.sendData.itemImage)
-    // },
     resetForm() {
       this.sendData = {
         sendUser: this.$store.state.user.name,
@@ -106,15 +91,6 @@ export default {
     },
     handleSendItem() {
       this.sendData.createAt = new Date().toJSON()
-      // const data = new FormData()
-      // data.append('data', JSON.stringify(this.sendData))
-      // data.append('sendUser', this.sendData.sendUser)
-      // data.append('receiveUser', this.sendData.receiveUser)
-      // data.append('itemCode', this.sendData.itemCode)
-      // data.append('itemName', this.sendData.itemName)
-      // data.append('itemImage', this.sendData.itemImage)
-      // data.append('createdAt', new Date().toString())
-      // data.append('updatedAt', new Date().toString())
       sendItem(this.sendData).then(res => {
         console.log(res)
         this.$router.push({ path: `/history` })

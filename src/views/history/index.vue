@@ -1,7 +1,6 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      {{ elasticQuery }}
       <el-row :gutter="15">
         <el-col :md="8" :sm="12" :xs="24">
           <el-input v-model="transactionFilter.id" placeholder="ID giao dịch" clearable class="filter-item" />
@@ -23,10 +22,10 @@
             v-model="transactionFilter.timestamp"
             class="filter-item full-width"
             type="daterange"
-            range-separator="To"
+            range-separator="đến"
             value-format="timestamp"
-            start-placeholder="Start date"
-            end-placeholder="End date"
+            start-placeholder="Từ ngày"
+            end-placeholder="ngày"
           />
         </el-col>
         <el-col :md="8" :sm="12" :xs="24">
@@ -130,29 +129,6 @@ export default {
     this.getTransactionHistory()
   },
   methods: {
-    resetElasticQuery() {
-      this.elasticQuery = {
-        query: {
-          bool: {
-            should: [
-              {
-                match: {
-                  sendUser: this.$store.state.user.name
-                }
-              },
-              {
-                match: {
-                  receiveUser: this.$store.state.user.name
-                }
-              }
-            ],
-            must: [],
-            filter: [],
-            must_not: []
-          }
-        }
-      }
-    },
     getTransactionHistory() {
       this.listLoading = true
       elasticQuery(this.elasticQuery).then(response => {
@@ -166,7 +142,7 @@ export default {
         if (key === 'timestamp' && Array.isArray(this.transactionFilter[key])) {
           this.elasticQuery.query.bool.must.push({
             range: {
-              timestamp: { gte: this.transactionFilter.timestamp[0], lte: this.transactionFilter.timestamp[1] }
+              timestamp: { gte: this.transactionFilter.timestamp[0] / 1000, lte: this.transactionFilter.timestamp[1] / 1000 }
             }
           })
         } else if (this.transactionFilter[key] != null && this.transactionFilter[key] !== '') {
