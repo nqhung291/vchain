@@ -43,6 +43,7 @@
 import { mapGetters } from 'vuex'
 import { sendItem } from '@/api/exchange'
 import { elasticQuery } from '@/api/exchange'
+import { itemMapping } from '@/utils/items'
 export default {
   data() {
     return {
@@ -71,16 +72,7 @@ export default {
           }
         }
       },
-      itemMapping: [
-        {
-          itemCode: 'sung001',
-          itemName: 'AK'
-        },
-        {
-          itemCode: 'sung002',
-          itemName: 'M416'
-        }
-      ]
+      itemMapping: itemMapping
     }
   },
   computed: {
@@ -163,7 +155,7 @@ export default {
         if (this.sendItemQuantity.has(key)) {
           sendNumber = this.sendItemQuantity.get(key)
         }
-        if (sendNumber > 0) {
+        if (receiveNumber - sendNumber > 0) {
           this.itemList.push({
             itemCode: key,
             itemName: this.itemMapping.find(e => e.itemCode === key).itemName,

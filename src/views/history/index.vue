@@ -95,7 +95,6 @@ export default {
     return {
       tableKey: 0,
       transactionList: null,
-      total: 0,
       listLoading: true,
       elasticQuery: {
         query: {

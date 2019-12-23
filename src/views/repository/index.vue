@@ -31,6 +31,7 @@
 
 <script>
 import { elasticQuery } from '@/api/exchange'
+import { itemMapping } from '@/utils/items'
 export default {
   data() {
     return {
@@ -49,16 +50,7 @@ export default {
           }
         }
       },
-      itemMapping: [
-        {
-          itemCode: 'sung001',
-          itemName: 'AK'
-        },
-        {
-          itemCode: 'sung002',
-          itemName: 'M416'
-        }
-      ]
+      itemMapping: itemMapping
     }
   },
   created() {
@@ -115,17 +107,6 @@ export default {
           quantity: receiveNumber - sendNumber
         })
       })
-      // for (const [key, value] of Object.entries(this.receiveItemQuantity)) {
-      //   const receiveNumber = this.receiveItemQuantity[key]
-      //   const sendNumber = this.sendItemQuantity[key] ? this.sendItemQuantity[key] : 0
-      //   console.log(key, receiveNumber - sendNumber)
-      //   this.itemList.push({
-      //     itemCode: key,
-      //     quantity: receiveNumber - sendNumber
-      //   })
-      // }
-
-      // console.log(this.itemList)
     }
 
   }
