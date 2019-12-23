@@ -82,25 +82,37 @@ export default {
             this.sendItemQuantity.set(e.itemCode, 1)
           }
         })
-        this.elasticQuery.query.bool.must = [
-          {
-            match: {
-              receiveUser: this.$store.state.user.name
-            }
+      })
+      this.elasticQuery.query.bool.must = [
+        {
+          match: {
+            receiveUser: this.$store.state.user.name
           }
-        ]
-        elasticQuery(this.elasticQuery).then(response => {
-          this.receiveItem = response
-          this.receiveItem.forEach(e => {
-            if (this.receiveItemQuantity.has(e.itemCode)) {
-              this.receiveItemQuantity.set(e.itemCode, this.receiveItemQuantity.get(e.itemCode) + 1)
-            } else {
-              this.receiveItemQuantity.set(e.itemCode, 1)
-            }
-          })
+        }
+      ]
+      await elasticQuery(this.elasticQuery).then(response => {
+        this.receiveItem = response
+        this.receiveItem.forEach(e => {
+          if (this.receiveItemQuantity.has(e.itemCode)) {
+            this.receiveItemQuantity.set(e.itemCode, this.receiveItemQuantity.get(e.itemCode) + 1)
+          } else {
+            this.receiveItemQuantity.set(e.itemCode, 1)
+          }
+        })
+      })
+      console.log('send', this.sendItemQuantity)
+      console.log('receive', this.receiveItemQuantity)
 
-          console.log('send', this.sendItemQuantity)
-          console.log('receive', this.receiveItemQuantity)
+      this.receiveItemQuantity.forEach((value, key, map) => {
+        const receiveNumber = value
+        let sendNumber = 0
+        if (this.sendItemQuantity.has(key)) {
+          sendNumber = this.sendItemQuantity.get(key)
+        }
+        this.itemList.push({
+          itemCode: key,
+          itemName: this.itemMapping.find(e => e.itemCode === key).itemName,
+          quantity: receiveNumber - sendNumber
         })
       })
       // for (const [key, value] of Object.entries(this.receiveItemQuantity)) {
