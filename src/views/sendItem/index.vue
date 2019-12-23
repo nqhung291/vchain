@@ -42,6 +42,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { sendItem } from '@/api/exchange'
+import { elasticQuery } from '@/api/exchange'
 export default {
   data() {
     return {
@@ -57,7 +58,20 @@ export default {
         // itemImage: null
       },
       // imageSrc: null,s
-      itemList: [
+      itemList: [],
+      sendItem: null,
+      receiveItem: null,
+      sendItemQuantity: new Map(),
+      receiveItemQuantity: new Map(),
+      itemQuantity: null,
+      elasticQuery: {
+        query: {
+          bool: {
+            must: []
+          }
+        }
+      },
+      itemMapping: [
         {
           itemCode: 'sung001',
           itemName: 'AK'
@@ -73,6 +87,9 @@ export default {
     ...mapGetters([
       'name'
     ])
+  },
+  created() {
+    this.getItemList()
   },
   methods: {
     resetForm() {
@@ -100,6 +117,59 @@ export default {
           type: 'success'
         })
         this.resetForm()
+      })
+    },
+    async getItemList() {
+      this.elasticQuery.query.bool.must = [
+        {
+          match: {
+            sendUser: this.$store.state.user.name
+          }
+        }
+      ]
+      await elasticQuery(this.elasticQuery).then(response => {
+        this.sendItem = response
+        this.sendItem.forEach(e => {
+          if (this.sendItemQuantity.has(e.itemCode)) {
+            this.sendItemQuantity.set(e.itemCode, this.sendItemQuantity.get(e.itemCode) + 1)
+          } else {
+            this.sendItemQuantity.set(e.itemCode, 1)
+          }
+        })
+      })
+      this.elasticQuery.query.bool.must = [
+        {
+          match: {
+            receiveUser: this.$store.state.user.name
+          }
+        }
+      ]
+      await elasticQuery(this.elasticQuery).then(response => {
+        this.receiveItem = response
+        this.receiveItem.forEach(e => {
+          if (this.receiveItemQuantity.has(e.itemCode)) {
+            this.receiveItemQuantity.set(e.itemCode, this.receiveItemQuantity.get(e.itemCode) + 1)
+          } else {
+            this.receiveItemQuantity.set(e.itemCode, 1)
+          }
+        })
+      })
+      console.log('send', this.sendItemQuantity)
+      console.log('receive', this.receiveItemQuantity)
+
+      this.receiveItemQuantity.forEach((value, key, map) => {
+        const receiveNumber = value
+        let sendNumber = 0
+        if (this.sendItemQuantity.has(key)) {
+          sendNumber = this.sendItemQuantity.get(key)
+        }
+        if (sendNumber > 0) {
+          this.itemList.push({
+            itemCode: key,
+            itemName: this.itemMapping.find(e => e.itemCode === key).itemName,
+            quantity: receiveNumber - sendNumber
+          })
+        }
       })
     }
   }
