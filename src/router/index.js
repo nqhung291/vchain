@@ -56,7 +56,7 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'repository',
+        path: '',
         component: () => import('@/views/repository'),
         name: 'Kho đồ',
         meta: { title: 'Kho đồ', icon: 'shopping', noCache: true }
