@@ -99,6 +99,9 @@ export default {
       elasticQuery: {
         from: 0,
         size: 1000,
+        sort: {
+          timestamp: 'desc'
+        },
         query: {
           bool: {
             should: [

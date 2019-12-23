@@ -1,42 +1,27 @@
-## Getting started
+## Project Tính toán phân tán
 
-```bash
-# clone the project
-git clone https://gitlab.com/ToiLDA/sales-portal-v2-fe.git
+Hướng dẫn cách sử dụng project
 
-# enter the project directory
-cd sales-portal-v2-fe
+## Run VueJS based front-end
+``` bash
 
-# install dependency
+# enter the front end folder
+cd client
+
+# install dependencies
 npm install
 
 # develop
 npm run dev
 ```
+This will automatically open http://localhost:9526
 
-This will automatically open http://localhost:9527
-
-## Build
-
-```bash
-# build for test environment
-npm run build:stage
-
-# build for production environment
-npm run build:prod
+## Run ExpressJS proxy server
+``` bash
+# enter the proxy server folder
+cd server
+# install packages
+npm install
+# run server
+node server.js
 ```
-
-## Advanced
-
-```bash
-# preview the release environment effect
-npm run preview
-
-# preview the release environment effect + static resource analysis
-npm run preview -- --report
-
-# code format check
-npm run lint
-
-# code format check and auto fix
-npm run lint -- --fix
