@@ -97,6 +97,8 @@ export default {
       transactionList: null,
       listLoading: true,
       elasticQuery: {
+        from: 0,
+        size: 1000,
         query: {
           bool: {
             should: [

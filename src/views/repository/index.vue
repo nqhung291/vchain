@@ -44,6 +44,8 @@ export default {
       receiveItemQuantity: new Map(),
       itemQuantity: null,
       elasticQuery: {
+        from: 0,
+        size: 1000,
         query: {
           bool: {
             must: []
