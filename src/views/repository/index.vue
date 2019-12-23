@@ -60,6 +60,7 @@ export default {
   },
   methods: {
     async getItemList() {
+      this.listLoading = true
       this.elasticQuery.query.bool.must = [
         {
           match: {
@@ -103,12 +104,15 @@ export default {
         if (this.sendItemQuantity.has(key)) {
           sendNumber = this.sendItemQuantity.get(key)
         }
-        this.itemList.push({
-          itemCode: key,
-          itemName: this.itemMapping.find(e => e.itemCode === key).itemName,
-          quantity: receiveNumber - sendNumber
-        })
+        if (receiveNumber - sendNumber > 0) {
+          this.itemList.push({
+            itemCode: key,
+            itemName: this.itemMapping.find(e => e.itemCode === key).itemName,
+            quantity: receiveNumber - sendNumber
+          })
+        }
       })
+      this.listLoading = false
     }
 
   }
